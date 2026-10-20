@@ -25,11 +25,17 @@ installing it, and `sudo ispgrid addon list` shows the reason on servers that ha
 To install something that is not listed (your own add-on, or a branch), add `--allow-unlisted`. Its code was not
 reviewed, and every installer run says so.
 
-## Add your add-on
+## Write your own add-on
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). How to write one: core's
-[CONTRIBUTING.md](https://github.com/ispgrid/ispgrid/blob/master/CONTRIBUTING.md#write-an-add-on). What the review
-looks for: [REVIEWING.md](REVIEWING.md).
+- **[The guide](docs/creating-an-addon.md):** from an empty repository to a listed add-on.
+- **[The template](https://github.com/ispgrid/addon-template):** a small add-on that works, to start from (**Use this
+  template** on GitHub).
+- **[The agent skill](skills/creating-ispgrid-addons/SKILL.md):** for AI coding agents such as Claude Code. Copy it
+  into your agent's skills folder.
+- **The API reference:** core's
+  [CONTRIBUTING.md, "Write an add-on"](https://github.com/ispgrid/ispgrid/blob/master/CONTRIBUTING.md#write-an-add-on).
+- **What the review looks for:** [REVIEWING.md](REVIEWING.md).
+- **How to list it:** [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## registry.json
 
