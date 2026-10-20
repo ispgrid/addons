@@ -47,6 +47,7 @@ expectCheck('unknown key', ['--offline', "$fixtures/unknown-key.json"], 1, 'unkn
 expectCheck('empty core', ['--offline', "$fixtures/empty-core.json"], 1, 'core');
 expectCheck('changed commit', ['--offline', "--base=$fixtures/valid.json", "$fixtures/changed-commit.json"], 1, 'already listed');
 expectCheck('added yank', ['--offline', "--base=$fixtures/valid.json", "$fixtures/added-yank.json"], 0);
+expectCheck('official only for ispgrid/', ['--offline', "$fixtures/fake-official.json"], 1, 'official');
 expectCheck('the registry itself', ['--offline', "$root/registry.json"], 0);
 
 printf("%d/%d passed\n", $count - $failed, $count);

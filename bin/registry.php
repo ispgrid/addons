@@ -80,6 +80,8 @@ function formatErrors(array $registry): array
         }
         if (! is_bool($addon['official'] ?? null)) {
             $errors[] = "$name: official must be true or false";
+        } elseif ($addon['official'] && ! str_starts_with($name, 'ispgrid/')) {
+            $errors[] = "$name: official is only for add-ons published by ISPGrid (ispgrid/...)";
         }
         if (! is_array($addon['versions'] ?? null) || $addon['versions'] === []) {
             $errors[] = "$name: versions must list at least one version";
