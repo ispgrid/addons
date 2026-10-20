@@ -1,0 +1,59 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * Adds a released version of an add-on to registry.json, reading its commit from the tag and its core series and
+ * description from its composer.json at that commit. Then open a pull request.
+ *
+ *   php bin/add-version vendor/package vX.Y.Z
+ */
+
+require __DIR__.'/registry.php';
+
+[$name, $version] = [$argv[1] ?? '', $argv[2] ?? ''];
+if (! preg_match(NAME_PATTERN, $name) || ! preg_match(VERSION_PATTERN, $version)) {
+    fwrite(STDERR, "Usage: php bin/add-version vendor/package vX.Y.Z\n");
+    exit(2);
+}
+$file = dirname(__DIR__).'/registry.json';
+$registry = loadRegistry($file);
+if ($registry === null) {
+    fwrite(STDERR, "registry.json is missing or not valid JSON\n");
+    exit(1);
+}
+if (isset($registry['addons'][$name]['versions'][$version])) {
+    fwrite(STDERR, "$name $version is already listed\n");
+    exit(1);
+}
+$commit = tagCommit($name, $version);
+if ($commit === null) {
+    fwrite(STDERR, "github.com/$name has no tag $version\n");
+    exit(1);
+}
+$composer = composerAt($name, $commit);
+if ($composer === null) {
+    fwrite(STDERR, "composer.json of $name could not be read at $commit\n");
+    exit(1);
+}
+
+$official = str_starts_with($name, 'ispgrid/');
+$registry['addons'][$name] ??= [
+    'description' => $composer['description'] ?? '',
+    'author' => $official ? 'ISPGrid' : ($composer['authors'][0]['name'] ?? explode('/', $name)[0]),
+    'official' => $official,
+    'versions' => [],
+];
+$registry['addons'][$name]['versions'][$version] = [
+    'commit' => $commit,
+    'core' => $composer['extra']['ispgrid']['core'] ?? [],
+];
+uksort($registry['addons'][$name]['versions'], 'version_compare');
+ksort($registry['addons']);
+
+$errors = [...formatErrors($registry), ...onlineErrors($name, $version, $registry['addons'][$name]['versions'][$version])];
+if ($errors !== []) {
+    fwrite(STDERR, implode("\n", $errors)."\n");
+    exit(1);
+}
+file_put_contents($file, json_encode($registry, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)."\n");
+echo "Added $name $version ($commit). Check registry.json, then open a pull request.\n";

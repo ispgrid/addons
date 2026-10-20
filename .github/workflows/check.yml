@@ -1,0 +1,31 @@
+name: check
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Tests
+        run: php tests/run.php
+
+      - name: Listed versions are unchanged
+        if: github.event_name == 'pull_request'
+        run: |
+          if git show "origin/${{ github.base_ref }}:registry.json" > "$RUNNER_TEMP/base.json" 2>/dev/null; then
+            php bin/check --offline --base="$RUNNER_TEMP/base.json"
+          fi
+
+      - name: Tags, commits and composer.json
+        run: php bin/check

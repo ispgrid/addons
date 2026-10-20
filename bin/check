@@ -1,0 +1,56 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * Checks registry.json: its format, that listed versions did not change (--base=FILE, the registry on master) and,
+ * unless --offline, that every tag points at its listed commit and the add-on's composer.json follows the rules.
+ *
+ *   php bin/check [--offline] [--base=FILE] [FILE]
+ */
+
+require __DIR__.'/registry.php';
+
+$offline = false;
+$baseFile = null;
+$file = dirname(__DIR__).'/registry.json';
+foreach (array_slice($argv, 1) as $arg) {
+    if ($arg === '--offline') {
+        $offline = true;
+    } elseif (str_starts_with($arg, '--base=')) {
+        $baseFile = substr($arg, 7);
+    } elseif (! str_starts_with($arg, '--')) {
+        $file = $arg;
+    } else {
+        fwrite(STDERR, "Unknown option: $arg\n");
+        exit(2);
+    }
+}
+
+$registry = loadRegistry($file);
+if ($registry === null) {
+    fwrite(STDERR, "registry: $file is missing or not valid JSON\n");
+    exit(1);
+}
+$errors = formatErrors($registry);
+if ($errors === [] && $baseFile !== null) {
+    $base = loadRegistry($baseFile);
+    if ($base === null) {
+        fwrite(STDERR, "registry: the base $baseFile is missing or not valid JSON\n");
+        exit(1);
+    }
+    $errors = immutabilityErrors($registry, $base);
+}
+if ($errors === [] && ! $offline) {
+    foreach ($registry['addons'] as $name => $addon) {
+        foreach ($addon['versions'] as $version => $entry) {
+            array_push($errors, ...onlineErrors($name, $version, $entry));
+        }
+    }
+}
+
+if ($errors !== []) {
+    fwrite(STDERR, implode("\n", $errors)."\n");
+    exit(1);
+}
+$versions = array_sum(array_map(fn (array $addon): int => count($addon['versions']), $registry['addons']));
+echo 'registry.json is valid: '.count($registry['addons'])." add-ons, $versions versions".($offline ? ' (format only)' : '')."\n";

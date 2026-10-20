@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "addons": {
+    "acme/thing": {
+      "description": "A test add-on",
+      "author": "Acme",
+      "official": false,
+      "versions": {
+        "v0.1.0": { "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "core": ["0.1"] }
+      }
+    }
+  }
+}
