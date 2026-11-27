@@ -26,6 +26,19 @@
                 }
             }
         },
+        "ispgrid/hotspot-vouchers": {
+            "description": "Hotspot vouchers for ISPGrid: batches of prepaid login cards to print, hand to shops and sell over the counter.",
+            "author": "ISPGrid",
+            "official": true,
+            "versions": {
+                "v0.1.0": {
+                    "commit": "b727260be5f66ca333d2abc5db49d34da6a94f98",
+                    "core": [
+                        "0.1"
+                    ]
+                }
+            }
+        },
         "ispgrid/ipdr": {
             "description": "Session records (IPDR) for ISPGrid: every session kept for two years and searchable by IP and time.",
             "author": "ISPGrid",
